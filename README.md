@@ -1,6 +1,7 @@
 # assistVariableName
 
-## こちらはノンプロ研Slackチャンネル「#10_リーダブル変数メーカー」の一時代替アプリとして開発したものです。
+## assistVariableName の概要
+こちらはノンプロ研Slackチャンネル「#10_リーダブル変数メーカー」の一時代替アプリとして開発したものです。
 
 ### デプロイ方法
 GoogleAppsScript にCode.gs、Index.htmlを貼り付け、デプロイします。
