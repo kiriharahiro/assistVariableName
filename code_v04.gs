@@ -1,8 +1,8 @@
 /**
- * GAS変数名提案ツール
- * Version: v_03 (凍結版 / Stable Release)
+ * 変数名提案ツール
+ * Version: v_04 (凍結版 / Stable Release)
  * 更新日: 2026-08-15
- * ノンプロ研 初心者GAS講座 サポートツール
+ * ノンプロ研 サポートツール
  */
 const CONFIG = {
   // 定数の表記スタイル: 'UPPER_SNAKE' (e.g. CONST_NAME) または 'CAMEL_CASE' (e.g. camelCase)
@@ -16,12 +16,12 @@ const CONFIG = {
 function doGet() {
   return HtmlService.createTemplateFromFile('Index')
     .evaluate()
-    .setTitle('GAS変数名提案ツール')
+    .setTitle('変数名提案ツール')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
-// GASの一般的な用語対応表（文字数の長い順に定義）
+// プログラミングで一般的な用語対応表（文字数の長い順に定義）
 const DICTIONARY = [
   // 15文字
   { jp: 'アクティブなスプレッドシート', en: 'activeSpreadsheet', short: 'ss' },
@@ -133,9 +133,8 @@ const DICTIONARY = [
 ];
 
 /**
- * 日本語の指示からGASに適したキャメルケースの変数名を提案します。
- * すべての変数タイプ（通常変数const/let、配列、真偽値、定数）の結果を一括で返します。
- * フロントエンドから非同期で呼び出されます。
+ * 日本語の指示から適したキャメルケースの変数名を提案します。
+ * すべての変数タイプ（通常変数、真偽値、配列、定数）の結果を一括で返します。
  * 
  * @param {string} japaneseText 日本語の指示
  * @return {object} 提案結果のオブジェクト
@@ -208,7 +207,7 @@ function suggestVariableName(japaneseText) {
 
     // 3. 基本となるキャメルケース候補の組み立て
 
-    // --- 推奨（GAS慣習）の基本名 ---
+    // --- 短縮形（一般的な慣習）の基本名 ---
     let baseRecName = '';
     const hasLastRow = parsedShortWords.includes('lastRow');
     const hasLastColumn = parsedShortWords.includes('lastColumn');
@@ -224,13 +223,12 @@ function suggestVariableName(japaneseText) {
     // --- 標準的な基本名 ---
     let baseStdName = toCamelCase(parsedStandardWords.join(' '));
 
-    // 4. 各変数タイプごとの候補リストを作成
+    // 4. 各変数タイプごとの候補リストを作成（全4種類）
     const types = [
-      { id: 'variable_const', label: '通常変数 (const)', prefix: 'const' },
-      { id: 'variable_let', label: '通常変数 (let)', prefix: 'let' },
-      { id: 'boolean', label: 'Boolean (真偽値)', prefix: 'let' },
-      { id: 'array', label: '配列・リスト', prefix: 'const' },
-      { id: 'constant_snake', label: '定数 (SNAKE)', prefix: 'const' }
+      { id: 'variable', label: '通常変数' },
+      { id: 'boolean', label: 'Boolean (真偽値)' },
+      { id: 'array', label: '配列・リスト' },
+      { id: 'constant_snake', label: '定数 (SNAKE)' }
     ];
 
     const resultsList = [];
@@ -243,38 +241,22 @@ function suggestVariableName(japaneseText) {
       const addedNames = new Set();
 
       if (recName && !addedNames.has(recName)) {
-        suggestions.push({
-          name: recName,
-          type: '推奨（GAS慣習）',
-          reason: 'GASで一般的に使われる、シンプルで直感的な名前です。',
-          prefix: t.prefix
-        });
+        suggestions.push({ name: recName });
         addedNames.add(recName);
       }
 
       if (stdName && !addedNames.has(stdName)) {
-        suggestions.push({
-          name: stdName,
-          type: '標準的',
-          reason: '言葉の意味をそのままキャメルケースにした名前です。',
-          prefix: t.prefix
-        });
+        suggestions.push({ name: stdName });
         addedNames.add(stdName);
       }
 
       if (suggestions.length === 0) {
-        suggestions.push({
-          name: 'variableName',
-          type: 'フォールバック',
-          reason: '変換できませんでした。一般的な変数名です。',
-          prefix: t.prefix
-        });
+        suggestions.push({ name: 'variableName' });
       }
 
       resultsList.push({
         id: t.id,
         label: t.label,
-        prefix: t.prefix,
         suggestions: suggestions
       });
     });
@@ -303,7 +285,7 @@ function toCamelCase(str) {
   if (!str) return '';
 
   // 記号（アポストロフィなど）の除去と、スペースやハイフンでの分割
-  let cleanStr = str.replace(/['’]/g, ''); // アポストロフィは除去 (e.g. spreadsheet's -> spreadsheets)
+  let cleanStr = str.replace(/['’]/g, ''); // アポストロフィは除去
   cleanStr = cleanStr.replace(/[^a-zA-Z0-9]/g, ' '); // 英数字以外はスペースに変換
 
   const words = cleanStr.split(/\s+/).filter(w => w.length > 0);
@@ -322,7 +304,7 @@ function toCamelCase(str) {
  * 変数タイプに応じた命名規則を適用します。
  * 
  * @param {string} name 元のキャメルケースの変数名
- * @param {string} type 変数タイプ ('constant', 'variable', 'array', 'boolean')
+ * @param {string} type 変数タイプ ('constant_snake', 'array', 'boolean', 'variable')
  * @param {string} originalJp 元の日本語テキスト
  * @return {string} 変換後の変数名
  */
@@ -339,8 +321,7 @@ function applyVarTypeRules(name, type, originalJp) {
     case 'boolean':
       return toBooleanName(name, originalJp);
       
-    case 'variable_const':
-    case 'variable_let':
+    case 'variable':
     default:
       return name; // 通常変数はそのままキャメルケース
   }
@@ -372,7 +353,6 @@ function toPlural(str) {
   if (!str) return '';
 
   // キャメルケースを大文字の区切りで分割して単語リストを作成
-  // 例: activeSheetId -> ['active', 'Sheet', 'Id']
   const words = str.split(/(?=[A-Z])/);
   if (words.length === 0) return '';
 
@@ -394,14 +374,13 @@ function toPlural(str) {
 function makeWordPlural(word) {
   const lower = word.toLowerCase();
   
-  // GAS特有の慣習や例外
-  if (lower === 'ss') return 'ss'; // GASのスプレッドシート略称は複数の場合も ss のままにする
+  // 一般的な慣習や例外
+  if (lower === 'ss') return 'ss'; // スプレッドシート略称は ss のままにする
   if (lower === 'child') return word.replace(/child/i, match => match === 'child' ? 'children' : 'CHILDREN');
   if (lower === 'person') return word.replace(/person/i, match => match === 'person' ? 'people' : 'PEOPLE');
   if (lower === 'index') return word.replace(/index/i, match => match === 'index' ? 'indices' : 'INDICES');
 
   // y で終わる単語 (子音 + y の場合のみ ies に変換)
-  // 例: property -> properties, key -> keys
   if (lower.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(lower.charAt(lower.length - 2))) {
     return word.slice(0, -1) + (word.charAt(word.length - 1) === 'y' ? 'ies' : 'IES');
   }
