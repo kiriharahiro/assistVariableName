@@ -1,8 +1,8 @@
 <!--
-  変数名提案ツール
-  Version: v_04
+  GAS変数名提案ツール
+  Version: v_03 (凍結版 / Stable Release)
   更新日: 2026-08-15
-  ノンプロ研 サポートツール
+  ノンプロ研 初心者GAS講座 サポートツール
 -->
 <!DOCTYPE html>
 <html lang="ja">
@@ -10,7 +10,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>変数名提案ツール</title>
+  <title>GAS変数名提案ツール</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -25,6 +25,7 @@
       --text-secondary: #475569;
       --text-muted: #64748b;
       --accent: #00b0f0;
+      /* ノンプロ研カラーの薄いブルー */
       --accent-gradient: linear-gradient(135deg, #00b0f0 0%, #1d72b8 100%);
       --accent-light: #e0f2fe;
       --card-border: #e2e8f0;
@@ -33,6 +34,14 @@
       --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
+      --badge-rec-bg: #d1fae5;
+      --badge-rec-text: #065f46;
+      --badge-std-bg: #dbeafe;
+      --badge-std-text: #1e40af;
+      --badge-detail-bg: #f3e8ff;
+      --badge-detail-text: #6b21a8;
+      --badge-fallback-bg: #fee2e2;
+      --badge-fallback-text: #991b1b;
       --radius: 16px;
       --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -50,6 +59,14 @@
         --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
         --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
         --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+        --badge-rec-bg: #064e3b;
+        --badge-rec-text: #a7f3d0;
+        --badge-std-bg: #1e3a8a;
+        --badge-std-text: #bfdbfe;
+        --badge-detail-bg: #581c87;
+        --badge-detail-text: #e9d5ff;
+        --badge-fallback-bg: #7f1d1d;
+        --badge-fallback-text: #fecaca;
       }
     }
 
@@ -135,7 +152,7 @@
     .subtitle {
       font-size: 15px;
       color: var(--text-secondary);
-      max-width: 520px;
+      max-width: 480px;
       margin: 0 auto;
       line-height: 1.5;
     }
@@ -293,15 +310,53 @@
       background-color: var(--bg-primary);
       border: 1px solid var(--card-border);
       border-radius: 12px;
-      padding: 12px 16px;
-      margin-bottom: 10px;
+      padding: 20px;
+      margin-bottom: 16px;
       transition: var(--transition);
       position: relative;
+      overflow: hidden;
     }
 
     .suggestion-card:hover {
       border-color: var(--accent);
-      box-shadow: var(--shadow-sm);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-rec {
+      background-color: var(--badge-rec-bg);
+      color: var(--badge-rec-text);
+    }
+
+    .badge-std {
+      background-color: var(--badge-std-bg);
+      color: var(--badge-std-text);
+    }
+
+    .badge-detail {
+      background-color: var(--badge-detail-bg);
+      color: var(--badge-detail-text);
+    }
+
+    .badge-fallback {
+      background-color: var(--badge-fallback-bg);
+      color: var(--badge-fallback-text);
     }
 
     /* 変数表示エリア */
@@ -311,7 +366,8 @@
       background-color: var(--bg-secondary);
       border: 1px solid var(--card-border);
       border-radius: 8px;
-      padding: 10px 14px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
       position: relative;
     }
 
@@ -324,6 +380,12 @@
       white-space: nowrap;
       flex-grow: 1;
       padding-right: 48px;
+    }
+
+    .variable-prefix {
+      color: #3b82f6;
+      margin-right: 6px;
+      font-weight: 400;
     }
 
     /* コピーボタン */
@@ -375,12 +437,83 @@
       opacity: 0.9;
     }
 
+    /* 提案理由 */
+    .reason-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
     /* フッター */
     footer {
       text-align: center;
       font-size: 12px;
       color: var(--text-muted);
       margin-top: 24px;
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: underline;
+      transition: var(--transition);
+    }
+
+    footer a:hover {
+      color: var(--accent);
+    }
+
+    /* 変数タイプセレクター */
+    .type-selector-group {
+      margin-bottom: 24px;
+    }
+
+    .type-selector {
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-primary);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+      transition: var(--transition);
+    }
+
+    .type-option {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .type-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .type-label {
+      display: block;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-radius: 8px;
+      transition: var(--transition);
+      user-select: none;
+      text-align: left;
+    }
+
+    .type-option input[type="radio"]:checked+.type-label {
+      background-color: var(--bg-secondary);
+      color: var(--accent);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ダークモード時の微調整 */
+    @media (prefers-color-scheme: dark) {
+      .type-option input[type="radio"]:checked+.type-label {
+        background-color: #222b3c;
+        color: #38bdf8;
+      }
     }
 
     /* アプリケーションレイアウト（左右2カラム） */
@@ -427,10 +560,13 @@
     }
 
     @keyframes pulse {
-      0%, 100% {
+
+      0%,
+      100% {
         opacity: 0.4;
         transform: scale(1);
       }
+
       50% {
         opacity: 0.7;
         transform: scale(1.05);
@@ -468,9 +604,9 @@
 
     /* タイプごとのグループ分け */
     .type-group {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       border-bottom: 1px dashed var(--card-border);
-      padding-bottom: 14px;
+      padding-bottom: 18px;
     }
 
     .type-group:last-child {
@@ -483,12 +619,13 @@
       font-size: 15px;
       font-weight: 700;
       color: var(--accent);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
+    /* ダークモード時のタイトル色調整 */
     @media (prefers-color-scheme: dark) {
       .type-group-title {
         color: #38bdf8;
@@ -503,6 +640,20 @@
       background: var(--accent-gradient);
       border-radius: 2px;
     }
+
+    /* 候補カードを少しコンパクトに調整 */
+    .suggestion-card {
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+
+    .suggestion-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .card-header {
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 
@@ -511,8 +662,8 @@
   <div class="container">
     <header>
       <div class="logo-container">{}</div>
-      <h1>変数名提案ツール</h1>
-      <p class="subtitle">日本語の変数名を入力すると、GASやVBAなど様々なプログラミング言語で使える直感的で使いやすい変数名を提案します。</p>
+      <h1>GAS変数名提案ツール</h1>
+      <p class="subtitle">日本語の変数名を入力すると、GAS（JavaScript）のキャメルケース規則に則った直感的で使いやすい変数名を提案します。</p>
     </header>
 
     <div class="app-layout">
@@ -548,7 +699,7 @@
         <!-- ローディング -->
         <div id="loading" class="loading-container">
           <div class="spinner"></div>
-          <div class="loading-text">用語辞書とGoogle翻訳で最適な変数名を考えています...</div>
+          <div class="loading-text">GASの辞書とGoogle翻訳で最適な変数名を考えています...</div>
         </div>
 
         <!-- エラー表示 -->
@@ -563,7 +714,7 @@
     </div>
 
     <footer>
-      ノンプロ研 サポートツール by kiri
+      ノンプロ研 初心者GAS講座 サポートツール by kiri
     </footer>
   </div>
 
@@ -627,7 +778,7 @@
           listDiv.className = 'type-suggestions-list';
 
           typeData.suggestions.forEach(function (item) {
-            const card = createSuggestionCard(item);
+            const card = createSuggestionCard(item, typeData.prefix);
             listDiv.appendChild(card);
           });
 
@@ -659,11 +810,30 @@
     }
 
     /**
+     * バッジのクラス名を取得
+     */
+    function getBadgeClass(type) {
+      if (type.includes('推奨')) return 'badge-rec';
+      if (type.includes('標準')) return 'badge-std';
+      if (type.includes('説明')) return 'badge-detail';
+      return 'badge-fallback';
+    }
+
+    /**
      * 提案カードHTML要素を作成
      */
-    function createSuggestionCard(item) {
+    function createSuggestionCard(item, prefix) {
       const card = document.createElement('div');
       card.className = 'suggestion-card';
+
+      // ヘッダー (分類バッジ)
+      const header = document.createElement('div');
+      header.className = 'card-header';
+      const badge = document.createElement('span');
+      badge.className = `badge ${getBadgeClass(item.type)}`;
+      badge.textContent = item.type;
+      header.appendChild(badge);
+      card.appendChild(header);
 
       // コード表示部
       const codeContainer = document.createElement('div');
@@ -671,7 +841,13 @@
 
       const codeElement = document.createElement('div');
       codeElement.className = 'variable-code';
-      codeElement.textContent = item.name;
+
+      // プレフィックス (const / let) の付与
+      const prefixSpan = document.createElement('span');
+      prefixSpan.className = 'variable-prefix';
+      prefixSpan.textContent = prefix;
+      codeElement.appendChild(prefixSpan);
+      codeElement.appendChild(document.createTextNode(' ' + item.name)); // 半角スペースを挟んで変数名を表示
       codeContainer.appendChild(codeElement);
 
       // コピーボタン
@@ -691,7 +867,8 @@
       tooltip.textContent = 'Copied!';
       codeContainer.appendChild(tooltip);
 
-      const textToCopy = item.name;
+      // コピーするテキストはプレフィックスを含める (例: "const lastRow")
+      const textToCopy = prefix + ' ' + item.name;
 
       copyBtn.onclick = function () {
         copyToClipboard(textToCopy, tooltip);
@@ -699,6 +876,12 @@
 
       codeContainer.appendChild(copyBtn);
       card.appendChild(codeContainer);
+
+      // 説明
+      const reason = document.createElement('div');
+      reason.className = 'reason-text';
+      reason.textContent = item.reason;
+      card.appendChild(reason);
 
       return card;
     }
@@ -724,7 +907,7 @@
     function fallbackCopyToClipboard(text, tooltipElement) {
       const textArea = document.createElement('textarea');
       textArea.value = text;
-      textArea.style.position = 'fixed';
+      textArea.style.position = 'fixed'; // 画面外に配置
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
@@ -751,37 +934,67 @@
      * ローカル環境デバッグ用モック結果生成
      */
     function getMockResult(query) {
+      // ローカルブラウザでダブルクリックして開いた時の簡易モック
       const clean = query.replace(/[のをおにはとでから]/g, ' ').replace(/\s+/g, ' ').trim();
-      let rawNames = [];
+      let rawSuggestions = [];
 
       if (query.includes('スプレッドシート') && query.includes('最終行')) {
-        rawNames = ['lastRow', 'spreadsheetLastRow'];
+        rawSuggestions = [
+          { name: 'lastRow', type: '推奨（GAS慣習）', reason: 'GASで一般的に使われる、シンプルで直感的な名前です。' },
+          { name: 'spreadsheetLastRow', type: '標準的', reason: '言葉の意味をそのままキャメルケースにした名前です。' }
+        ];
       } else if (query.includes('アクティブなシート')) {
-        rawNames = ['sheet', 'activeSheet'];
+        rawSuggestions = [
+          { name: 'sheet', type: '推奨（GAS慣習）', reason: 'GASで一般的に使われる、シンプルで直感的な名前です。' },
+          { name: 'activeSheet', type: '標準的', reason: '言葉の意味をそのままキャメルケースにした名前です。' }
+        ];
       } else {
+        // 簡易キャメルケース化モック
         const fakeName = clean.split(' ').map(function (w, i) {
           return i === 0 ? 'variable' : 'Name';
         }).join('');
-        rawNames = [fakeName];
+        rawSuggestions = [
+          { name: fakeName, type: '標準的', reason: `ローカル検証用モック結果です。入力: ${query}` }
+        ];
       }
 
+      // 各変数タイプごとの候補リストを作成
       const types = [
-        { id: 'variable', label: '通常変数' },
-        { id: 'boolean', label: 'Boolean (真偽値)' },
-        { id: 'array', label: '配列・リスト' },
-        { id: 'constant_snake', label: '定数 (SNAKE)' }
+        { id: 'variable_const', label: '通常変数 (const)', prefix: 'const' },
+        { id: 'variable_let', label: '通常変数 (let)', prefix: 'let' },
+        { id: 'boolean', label: 'Boolean (真偽値)', prefix: 'let' },
+        { id: 'array', label: '配列・リスト', prefix: 'const' },
+        { id: 'constant_snake', label: '定数 (SNAKE)', prefix: 'const' }
       ];
 
       const resultsList = [];
 
       types.forEach(function (t) {
-        const suggestions = rawNames.map(function (name) {
-          return { name: applyMockVarTypeRules(name, t.id, query) };
+        const suggestions = rawSuggestions.map(function (item) {
+          const transformedName = applyMockVarTypeRules(item.name, t.id, query);
+          let transformedReason = item.reason;
+          if (t.id === 'constant_snake') {
+            transformedReason += '（定数として大文字スネークケースに変換されました）';
+          } else if (t.id === 'variable_const') {
+            transformedReason += '（const宣言の通常変数として提案されました）';
+          } else if (t.id === 'variable_let') {
+            transformedReason += '（let宣言の通常変数として提案されました）';
+          } else if (t.id === 'array') {
+            transformedReason += '（配列・リストとして複数形に変換されました）';
+          } else if (t.id === 'boolean') {
+            transformedReason += '（真偽値として is/has プレフィックスが付与されました）';
+          }
+          return {
+            name: transformedName,
+            type: item.type,
+            reason: transformedReason
+          };
         });
 
         resultsList.push({
           id: t.id,
           label: t.label,
+          prefix: t.prefix,
           suggestions: suggestions
         });
       });
@@ -799,28 +1012,26 @@
     function applyMockVarTypeRules(name, type, query) {
       if (!name) return '';
       if (type === 'constant_snake') {
+        // 簡易的な大文字スネークケース変換
         return name.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
       } else if (type === 'array') {
-        if (name === 'ss') return 'ss';
+        // 簡易的な複数形変換
+        if (name === 'ss') return 'ss'; // ssはそのまま
         if (name.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(name.charAt(name.length - 2))) {
           return name.slice(0, -1) + 'ies';
         }
         if (name.endsWith('s')) return name;
         return name + 's';
       } else if (type === 'boolean') {
+        // 簡易的なBoolean変換
         const isHas = /[ある持含存在得]/.test(query) || ['data', 'value', 'error', 'file'].some(function (w) {
           return name.toLowerCase().includes(w);
         });
         const prefix = isHas ? 'has' : 'is';
         return prefix + name.charAt(0).toUpperCase() + name.slice(1);
       }
-      return name; // variable
+      return name; // variable_const, variable_let はそのまま
     }
-  </script>
-</body>
-
-</html>
-
   </script>
 </body>
 
