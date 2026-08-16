@@ -11,7 +11,8 @@ GoogleAppsScript にCode.gs、Index.htmlを貼り付け、デプロイします�
 
 ### 使い方
 日本語の関数名を入力してEnter または「英語の変数名を生成する」をクリックします。
-<img width="1066" height="707" alt="2026-08-15_15h28_59" src="https://github.com/user-attachments/assets/3db6147b-053c-49b5-90e9-9dfad4e26715" />
+<img width="1152" height="919" alt="2026-08-16_10h18_09" src="https://github.com/user-attachments/assets/7bb4b0ac-89e1-4bbe-be95-82841a2a87ae" />
+
 
 
 アウトプットとして、4種類の英語変数名を表示します。
@@ -20,8 +21,7 @@ GoogleAppsScript にCode.gs、Index.htmlを貼り付け、デプロイします�
 ・配列・リスト
 ・定数 (SNAKE)
 各変数名は右側のコピーアイコンクリックするとコピーされます。
-<img width="1006" height="852" alt="2026-08-15_15h29_22" src="https://github.com/user-attachments/assets/3df5cc89-9fb4-4dcb-ab0e-c5d3875ca2fb" />
-
+<img width="828" height="924" alt="2026-08-16_10h18_56" src="https://github.com/user-attachments/assets/70f4d3fa-f41a-4768-b932-9bd535804650" />
 
 Google Apps Script（HtmlService）でホストされるWebアプリケーションです。
 利用者が個別のAPIキー（Gemini API等）を用意することなく、完全に無料・登録不要で利用できます。
